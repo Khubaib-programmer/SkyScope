@@ -1,0 +1,111 @@
+/* ============================================
+   Night Sky View — Constellation & Planet Chart
+   Reuses tokens from style.css; this file only adds
+   layout + the d3-celestial canvas theming.
+   ============================================ */
+
+body { background: var(--bg-dark); }
+
+.icon-btn { text-decoration: none; }
+
+.nightsky-body {
+  display: grid;
+  grid-template-columns: 290px 1fr 290px;
+  gap: 1px;
+  background: rgba(0, 0, 0, 0.3);
+  height: calc(100vh - 70px);
+  position: relative;
+  z-index: 1;
+}
+
+.nightsky-panel {
+  background: var(--bg-panel-solid);
+}
+
+/* Toggle switches for display options */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: var(--data-font);
+}
+.toggle-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.toggle-row:hover { color: var(--text-light); }
+
+/* Legend */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.legend-dot.sun { background: #ffdd55; box-shadow: 0 0 8px #ffdd55; }
+.legend-dot.moon { background: #e8edf5; box-shadow: 0 0 6px #e8edf5; }
+.legend-dot.planet { background: var(--accent-teal); box-shadow: 0 0 6px var(--accent-teal); }
+.legend-line {
+  width: 16px; height: 0;
+  border-top: 1px solid var(--text-dim);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Chart container */
+.nightsky-chart-container {
+  position: relative;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#celestial-map {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#celestial-map svg, #celestial-map canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Override d3-celestial's default form (we use our own toggles) */
+#celestial-form { display: none !important; }
+
+/* Visible objects list reuses .satellite-list from style.css,
+   just give entries a slightly different accent here */
+.nightsky-panel .satellite-list li::before {
+  background: var(--accent-teal);
+}
+.nightsky-panel .satellite-list li:hover {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.25);
+}
+
+@media (max-width: 1024px) {
+  .nightsky-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 55vh auto;
+    height: auto;
+  }
+  .nightsky-panel { max-height: 260px; }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "SkyScope — Your Window to the Universe",
+  "short_name": "SkyScope",
+  "description": "Real-time satellite tracking, ISS flyovers, and celestial events above any location on Earth.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050816",
+  "theme_color": "#050816",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

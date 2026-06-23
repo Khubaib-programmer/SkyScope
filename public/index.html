@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SkyScope — Real-time satellite tracking, ISS flyovers, and celestial events above any location on Earth. Your window to the universe." />
+  <meta name="theme-color" content="#050816" />
+  <title>SkyScope — Your Window to the Universe</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- CesiumJS for 3D Globe -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Widgets/widgets.css" rel="stylesheet" />
+  <!-- satellite.js: SGP4/SDP4 orbital propagator for real-time positions from TLE data -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
+  <!-- Lucide Icons — lightweight, modern SVG icon library -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+
+  <!-- ============ LOADING OVERLAY ============ -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Initializing SkyScope...</div>
+  </div>
+
+  <!-- ============ TOAST NOTIFICATIONS ============ -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- ============ LANDING SCREEN ============ -->
+  <section id="landing" class="screen active">
+    <div id="starfield"></div>
+
+    <header class="landing-header">
+      <div class="logo"><i data-lucide="satellite" class="icon-inline"></i> SkyScope</div>
+      <div class="status-badge online" id="serverStatus"><i data-lucide="wifi" class="icon-xs"></i> Connected</div>
+    </header>
+
+    <div class="landing-content">
+      <h1>Your Window to the <span class="highlight">Universe</span></h1>
+      <p class="tagline">Track real-time satellites, ISS flyovers, and celestial events above any location on Earth — powered by live orbital data.</p>
+
+      <div class="location-box">
+        <i data-lucide="search" class="input-icon"></i>
+        <input type="text" id="locationInput" placeholder="Search any city or place (e.g. Mumbai, Tokyo, London)" />
+        <button id="searchBtn"><i data-lucide="compass" class="icon-inline"></i> Explore</button>
+      </div>
+      <button id="useMyLocationBtn" class="secondary-btn"><i data-lucide="map-pin" class="icon-inline"></i> Use My Current Location</button>
+
+      <div class="quick-stats">
+        <div class="stat-card">
+          <span class="stat-number" id="satCountPreview">--</span>
+          <span class="stat-label"><i data-lucide="radio" class="icon-xs"></i> Satellites Tracked</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number"><i data-lucide="globe-2" class="icon-stat"></i></span>
+          <span class="stat-label">Any Location on Earth</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number"><i data-lucide="activity" class="icon-stat"></i></span>
+          <span class="stat-label">Real-Time Updates</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD SCREEN ============ -->
+  <section id="dashboard" class="screen">
+    <header class="dash-header">
+      <div class="logo small"><i data-lucide="satellite" class="icon-inline"></i> SkyScope</div>
+      <div class="location-display" id="currentLocationDisplay"><i data-lucide="map-pin" class="icon-xs"></i> Loading...</div>
+      <button id="nightSkyBtn" class="icon-btn"><i data-lucide="sparkles" class="icon-xs"></i> Night Sky</button>
+      <button id="backBtn" class="icon-btn"><i data-lucide="arrow-left" class="icon-xs"></i> Back</button>
+      <button id="compareBtn" class="icon-btn"><i data-lucide="columns-2" class="icon-xs"></i> Compare</button>
+    </header>
+
+    <div class="dash-body">
+      <!-- Left Panel -->
+      <aside class="panel left-panel">
+        <h3><i data-lucide="cloud-moon" class="icon-xs"></i> Sky Conditions</h3>
+        <div class="info-row"><span><i data-lucide="moon" class="icon-xs"></i> Moon Phase</span><strong id="moonPhase">--</strong></div>
+        <div class="info-row"><span><i data-lucide="cloud" class="icon-xs"></i> Cloud Cover</span><strong id="cloudCover">--</strong></div>
+        <div class="info-row"><span><i data-lucide="eye" class="icon-xs"></i> Visibility</span><strong id="visibility">--</strong></div>
+        <div class="info-row"><span><i data-lucide="rocket" class="icon-xs"></i> ISS Next Pass</span><strong id="issNextPass">--</strong></div>
+
+        <h3><i data-lucide="telescope" class="icon-xs"></i> Viewing Conditions</h3>
+        <div id="viewingSpotResult" class="viewing-spot-box">
+          Analyzing sky conditions...
+        </div>
+      </aside>
+
+      <!-- Center Globe -->
+      <main class="globe-container">
+        <div id="cesiumContainer"></div>
+        <div class="globe-overlay-top">
+          <span id="liveIndicator">LIVE</span>
+          <span id="lastUpdated">Connecting...</span>
+        </div>
+      </main>
+
+      <!-- Right Panel -->
+      <aside class="panel right-panel">
+        <h3><i data-lucide="orbit" class="icon-xs"></i> Objects Overhead</h3>
+        <ul id="satelliteList" class="satellite-list">
+          <li class="loading-item"><span class="data-loading"></span> Scanning for satellites...</li>
+        </ul>
+      </aside>
+    </div>
+
+    <!-- Bottom Bar -->
+    <footer class="bottom-bar">
+      <div><i data-lucide="moon" class="icon-xs"></i> Moon: <span id="bottomMoon">--</span></div>
+      <div><i data-lucide="rocket" class="icon-xs"></i> ISS Pass: <span id="bottomISS">--</span></div>
+      <div><i data-lucide="cloud-sun" class="icon-xs"></i> Weather: <span id="bottomWeather">--</span></div>
+    </footer>
+  </section>
+
+  <!-- ============ SATELLITE DETAIL MODAL ============ -->
+  <div id="satModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close-btn" id="closeModal"><i data-lucide="x" class="icon-xs"></i></button>
+      <h2 id="modalSatName">Satellite Name</h2>
+      <div class="modal-grid">
+        <div><span><i data-lucide="tag" class="icon-xs"></i> Type</span><strong id="modalType">--</strong></div>
+        <div><span><i data-lucide="mountain" class="icon-xs"></i> Altitude</span><strong id="modalAltitude">--</strong></div>
+        <div><span><i data-lucide="gauge" class="icon-xs"></i> Speed</span><strong id="modalSpeed">--</strong></div>
+        <div><span><i data-lucide="flag" class="icon-xs"></i> Country</span><strong id="modalCountry">--</strong></div>
+      </div>
+      <button id="showOrbitBtn" class="primary-btn full-width"><i data-lucide="orbit" class="icon-inline"></i> Show Orbit Path</button>
+    </div>
+  </div>
+
+  <!-- ============ COMPARE MODE SCREEN ============ -->
+  <section id="compareScreen" class="screen">
+    <header class="dash-header">
+      <div class="logo small"><i data-lucide="columns-2" class="icon-inline"></i> SkyScope — Compare Mode</div>
+      <button id="exitCompareBtn" class="icon-btn"><i data-lucide="x" class="icon-xs"></i> Exit Compare</button>
+    </header>
+    <div class="compare-body">
+      <div class="compare-half">
+        <input type="text" id="locationA" placeholder="Location A (press Enter)" />
+        <div id="cesiumContainerA" class="compare-globe"></div>
+      </div>
+      <div class="compare-half">
+        <input type="text" id="locationB" placeholder="Location B (press Enter)" />
+        <div id="cesiumContainerB" class="compare-globe"></div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/config.js"></script>
+  <script src="js/starfield.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/orbital.js"></script>
+  <script src="js/globe.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Initialize Lucide icons after DOM is ready
+    document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });
+  </script>
+</body>
+</html>

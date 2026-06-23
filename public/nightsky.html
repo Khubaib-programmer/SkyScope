@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#050816" />
+  <title>SkyScope — Night Sky View</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛰️</text></svg>" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/nightsky.css" />
+
+  <!-- D3-Celestial: renders the constellation/star/planet chart.
+       Using d3-celestial's own bundled lib files (their tested d3 + d3.geo.projection
+       build) instead of separate generic D3 packages — d3-celestial requires this
+       exact pairing and breaks with standalone d3 v5/d3-geo/d3-geo-projection. -->
+  <script src="https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/lib/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/lib/d3.geo.projection.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/celestial.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <div id="starfield"></div>
+
+  <header class="dash-header">
+    <div class="logo small"><i data-lucide="sparkles" class="icon-inline"></i> SkyScope — Night Sky View</div>
+    <div class="location-display" id="nightSkyLocationDisplay"><i data-lucide="map-pin" class="icon-xs"></i> Loading...</div>
+    <a href="index.html" class="icon-btn"><i data-lucide="arrow-left" class="icon-xs"></i> Back to Dashboard</a>
+  </header>
+
+  <div class="nightsky-body">
+    <!-- Left: controls + legend -->
+    <aside class="panel nightsky-panel">
+      <h3><i data-lucide="settings-2" class="icon-xs"></i> Sky Settings</h3>
+
+      <div class="info-row">
+        <span><i data-lucide="clock" class="icon-xs"></i> Date / Time</span>
+        <strong id="nightSkyTime">--</strong>
+      </div>
+      <div class="info-row">
+        <span><i data-lucide="move-vertical" class="icon-xs"></i> Latitude</span>
+        <strong id="nightSkyLat">--</strong>
+      </div>
+      <div class="info-row">
+        <span><i data-lucide="move-horizontal" class="icon-xs"></i> Longitude</span>
+        <strong id="nightSkyLng">--</strong>
+      </div>
+
+      <h3><i data-lucide="sliders-horizontal" class="icon-xs"></i> Display Options</h3>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggleConstellationLines" checked />
+        <span>Constellation Lines</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggleConstellationNames" checked />
+        <span>Constellation Names</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="togglePlanets" checked />
+        <span>Planets</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggleMilkyWay" checked />
+        <span>Milky Way Band</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="toggleHorizon" checked />
+        <span>Horizon Marker</span>
+      </label>
+
+      <h3><i data-lucide="info" class="icon-xs"></i> Legend</h3>
+      <div class="legend-item"><span class="legend-dot sun"></span> Sun</div>
+      <div class="legend-item"><span class="legend-dot moon"></span> Moon</div>
+      <div class="legend-item"><span class="legend-dot planet"></span> Planet</div>
+      <div class="legend-item"><span class="legend-line"></span> Constellation line</div>
+    </aside>
+
+    <!-- Center: the celestial chart -->
+    <main class="nightsky-chart-container">
+      <div class="globe-overlay-top">
+        <span id="chartLiveIndicator">LIVE SKY VIEW</span>
+        <span id="chartUpdated">Rendering...</span>
+      </div>
+      <div id="celestial-map"></div>
+    </main>
+
+    <!-- Right: currently visible objects list -->
+    <aside class="panel nightsky-panel">
+      <h3><i data-lucide="telescope" class="icon-xs"></i> Visible Tonight</h3>
+      <ul id="visibleObjectsList" class="satellite-list">
+        <li class="loading-item"><span class="data-loading"></span> Calculating sky positions...</li>
+      </ul>
+    </aside>
+  </div>
+
+  <script src="js/starfield.js"></script>
+  <script src="js/nightsky.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => { lucide.createIcons(); });
+  </script>
+</body>
+</html>
