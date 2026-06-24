@@ -10,13 +10,18 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/nightsky.css" />
 
-  <!-- D3-Celestial: renders the constellation/star/planet chart.
-       Using d3-celestial's own bundled lib files (their tested d3 + d3.geo.projection
-       build) instead of separate generic D3 packages — d3-celestial requires this
-       exact pairing and breaks with standalone d3 v5/d3-geo/d3-geo-projection. -->
-  <script src="https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/lib/d3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/lib/d3.geo.projection.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/ofrohn/d3-celestial@master/celestial.min.js"></script>
+  <!-- D3-Celestial: renders stars, constellations, and the Milky Way band.
+       (Planets are NOT rendered by d3-celestial here — its planets module
+       proved unreliable after extensive testing. Planets are instead
+       calculated independently below using astronomy-engine and drawn
+       as a custom overlay on top of this chart.) -->
+  <script src="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/lib/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-celestial@0.7.35/celestial.min.js"></script>
+
+  <!-- Astronomy Engine: NASA/JPL-grade Sun/Moon/planet position calculator.
+       Runs entirely client-side, no API key, no signup, no network call. -->
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2/astronomy.browser.min.js"></script>
+
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 </head>
@@ -64,10 +69,6 @@
         <input type="checkbox" id="toggleMilkyWay" checked />
         <span>Milky Way Band</span>
       </label>
-      <label class="toggle-row">
-        <input type="checkbox" id="toggleHorizon" checked />
-        <span>Horizon Marker</span>
-      </label>
 
       <h3><i data-lucide="info" class="icon-xs"></i> Legend</h3>
       <div class="legend-item"><span class="legend-dot sun"></span> Sun</div>
@@ -83,6 +84,8 @@
         <span id="chartUpdated">Rendering...</span>
       </div>
       <div id="celestial-map"></div>
+      <!-- Custom planet overlay, drawn independently via astronomy-engine -->
+      <svg id="planetOverlay" class="planet-overlay"></svg>
     </main>
 
     <!-- Right: currently visible objects list -->
