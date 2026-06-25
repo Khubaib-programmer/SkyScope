@@ -290,3 +290,6 @@ app.listen(PORT, () => {
   console.log(`   • OpenWeather:  ${OPENWEATHER_API_KEY && !OPENWEATHER_API_KEY.includes("your_") ? "✅ Configured" : "⚠️  Using demo data"}`);
   console.log(`\n   Open http://localhost:${PORT} in your browser.\n`);
 });
+
+// Export for Vercel serverless deployment
+module.exports = app;
