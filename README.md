@@ -4,7 +4,7 @@
 
 A real-time cosmic radar. Pick any location on Earth and see exactly what's overhead right now — satellites, the ISS, planets, and constellations — rendered on an interactive 3D globe and a full night-sky chart, with live orbital mechanics.
 
-🔗 **Live demo:** https://sky-scope-two.vercel.app
+🔗 **Live demo:** https://sky-scope-1.vercel.app/
 📂 **Repository:** https://github.com/Khubaib-programmer/SkyScope
 
 ---
